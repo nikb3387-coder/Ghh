@@ -4,8 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.StatFs
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,6 +21,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -38,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tabTiles: TextView
     private lateinit var tabAll: TextView
     private lateinit var taskbarIcons: LinearLayout
+    private lateinit var pcWindow: View
     private lateinit var tilesAdapter: TilesAdapter
     private lateinit var allAdapter: AllAppsAdapter
 
@@ -63,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         tabTiles = findViewById(R.id.tabTiles)
         tabAll = findViewById(R.id.tabAll)
         taskbarIcons = findViewById(R.id.taskbarIcons)
+        pcWindow = findViewById(R.id.pcWindow)
 
         val lp = startPanel.layoutParams as FrameLayout.LayoutParams
         lp.topMargin = (resources.displayMetrics.heightPixels * 0.25f).toInt()
@@ -76,6 +82,9 @@ class MainActivity : AppCompatActivity() {
         allList.adapter = allAdapter
 
         findViewById<View>(R.id.desktop).setOnClickListener { hidePanel() }
+        findViewById<View>(R.id.pcIcon).setOnClickListener { showPcWindow() }
+        findViewById<View>(R.id.pcClose).setOnClickListener { pcWindow.visibility = View.GONE }
+        findViewById<View>(R.id.driveItem).setOnClickListener { openFiles() }
         findViewById<View>(R.id.startButton).setOnClickListener {
             if (startPanel.visibility == View.VISIBLE) hidePanel() else showPanel(false, false)
         }
@@ -108,6 +117,7 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (startPanel.visibility == View.VISIBLE) hidePanel()
+                else if (pcWindow.visibility == View.VISIBLE) pcWindow.visibility = View.GONE
             }
         })
 
@@ -247,6 +257,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showPcWindow() {
+        hidePanel()
+        val stat = StatFs(Environment.getDataDirectory().path)
+        val total = stat.blockCountLong * stat.blockSizeLong
+        val free = stat.availableBytesLong
+        val pct = if (total > 0) ((total - free) * 100 / total).toInt() else 0
+        val bar = findViewById<ProgressBar>(R.id.driveBar)
+        bar.progress = pct
+        bar.progressTintList = ColorStateList.valueOf(
+            if (pct >= 90) 0xFFDA3B01.toInt() else 0xFF26A0DA.toInt()
+        )
+        findViewById<TextView>(R.id.driveInfo).text =
+            getString(R.string.drive_info, gb(free), gb(total))
+        pcWindow.visibility = View.VISIBLE
+    }
+
+    private fun gb(bytes: Long): String =
+        String.format(Locale.getDefault(), "%.1f", bytes / 1073741824.0)
+
+    private fun openFiles() {
+        val attempts = listOf(
+            Intent(Intent.ACTION_VIEW).setDataAndType(
+                Uri.parse("content://com.android.externalstorage.documents/root/primary"),
+                "vnd.android.document/root"
+            ),
+            Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
+        )
+        for (i in attempts) {
+            try {
+                startActivity(i)
+                return
+            } catch (e: Exception) {
+                // пробуем следующий вариант
+            }
+        }
+    }
+
     private fun launchApp(app: AppInfo) {
         packageManager.getLaunchIntentForPackage(app.packageName)?.let {
             hidePanel()
@@ -269,6 +316,44 @@ class MainActivity : AppCompatActivity() {
     private fun showMenu(anchor: View, app: AppInfo) {
         val pinnedTile = app.packageName in prefs.get(Prefs.TILES)
         val pinnedBar = app.packageName in prefs.get(Prefs.TASKBAR)
+        PopupMenu(this, anchor).apply {
+            menu.add(0, 1, 0, if (pinnedTile) R.string.unpin_start else R.string.pin_start)
+            menu.add(0, 2, 1, if (pinnedBar) R.string.unpin_taskbar else R.string.pin_taskbar)
+            menu.add(0, 3, 2, R.string.app_info)
+            menu.add(0, 4, 3, R.string.uninstall)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    1 -> {
+                        toggle(Prefs.TILES, app.packageName)
+                        refreshTiles()
+                    }
+                    2 -> {
+                        if (!toggle(Prefs.TASKBAR, app.packageName, 3)) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                R.string.taskbar_full,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        refreshTaskbar()
+                    }
+                    3 -> startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            .setData(Uri.parse("package:${app.packageName}"))
+                    )
+                    4 -> startActivity(
+                        Intent(Intent.ACTION_DELETE)
+                            .setData(Uri.parse("package:${app.packageName}"))
+                    )
+                }
+                true
+            }
+            show()
+        }
+    }
+
+    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+}efs.TASKBAR)
         PopupMenu(this, anchor).apply {
             menu.add(0, 1, 0, if (pinnedTile) R.string.unpin_start else R.string.pin_start)
             menu.add(0, 2, 1, if (pinnedBar) R.string.unpin_taskbar else R.string.pin_taskbar)
