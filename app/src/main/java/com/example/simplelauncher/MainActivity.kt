@@ -261,7 +261,7 @@ class MainActivity : AppCompatActivity() {
         hidePanel()
         val stat = StatFs(Environment.getDataDirectory().path)
         val total = stat.blockCountLong * stat.blockSizeLong
-        val free = stat.availableBytesLong
+        val free = stat.availableBytes
         val pct = if (total > 0) ((total - free) * 100 / total).toInt() else 0
         val bar = findViewById<ProgressBar>(R.id.driveBar)
         bar.progress = pct
