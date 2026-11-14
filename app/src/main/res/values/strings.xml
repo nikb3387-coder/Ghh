@@ -14,4 +14,9 @@
     <string name="taskbar_full">На панели задач максимум 3 приложения</string>
     <string name="app_info">О приложении</string>
     <string name="uninstall">Удалить</string>
+    <string name="my_computer">Этот компьютер</string>
+    <string name="drives_header">Устройства и диски (1)</string>
+    <string name="drive_name">Локальный диск (C:)</string>
+    <string name="drive_info">%1$s ГБ свободно из %2$s ГБ</string>
+    <string name="close">Закрыть</string>
 </resources>
