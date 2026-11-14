@@ -353,42 +353,4 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
-}efs.TASKBAR)
-        PopupMenu(this, anchor).apply {
-            menu.add(0, 1, 0, if (pinnedTile) R.string.unpin_start else R.string.pin_start)
-            menu.add(0, 2, 1, if (pinnedBar) R.string.unpin_taskbar else R.string.pin_taskbar)
-            menu.add(0, 3, 2, R.string.app_info)
-            menu.add(0, 4, 3, R.string.uninstall)
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    1 -> {
-                        toggle(Prefs.TILES, app.packageName)
-                        refreshTiles()
-                    }
-                    2 -> {
-                        if (!toggle(Prefs.TASKBAR, app.packageName, 3)) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                R.string.taskbar_full,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        refreshTaskbar()
-                    }
-                    3 -> startActivity(
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            .setData(Uri.parse("package:${app.packageName}"))
-                    )
-                    4 -> startActivity(
-                        Intent(Intent.ACTION_DELETE)
-                            .setData(Uri.parse("package:${app.packageName}"))
-                    )
-                }
-                true
-            }
-            show()
-        }
-    }
-
-    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 }
