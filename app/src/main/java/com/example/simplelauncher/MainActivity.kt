@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity() {
         taskbarIcons = findViewById(R.id.taskbarIcons)
         pcWindow = findViewById(R.id.pcWindow)
 
-        // Меню Пуск занимает примерно 3/4 экрана снизу
         val lp = startPanel.layoutParams as FrameLayout.LayoutParams
         lp.topMargin = (resources.displayMetrics.heightPixels * 0.25f).toInt()
         startPanel.layoutParams = lp
@@ -144,8 +143,6 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(packageReceiver)
     }
 
-    // ---------- загрузка ----------
-
     private fun loadApps() {
         Thread {
             val pm = packageManager
@@ -168,8 +165,6 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
-
-    // ---------- меню Пуск ----------
 
     private fun showPanel(all: Boolean, focusSearch: Boolean) {
         startPanel.visibility = View.VISIBLE
@@ -242,8 +237,6 @@ class MainActivity : AppCompatActivity() {
         emptyTiles.visibility = if (!showingAll && empty) View.VISIBLE else View.GONE
     }
 
-    // ---------- панель задач ----------
-
     private fun refreshTaskbar() {
         taskbarIcons.removeAllViews()
         val tv = TypedValue()
@@ -263,10 +256,6 @@ class MainActivity : AppCompatActivity() {
             taskbarIcons.addView(iv)
         }
     }
-
-    // ---------- действия ----------
-
-    // ---------- окно "Этот компьютер" ----------
 
     private fun showPcWindow() {
         hidePanel()
