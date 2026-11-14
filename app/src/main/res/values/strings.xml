@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Лаунчер 10</string>
+    <string name="search_hint">Введите здесь текст для поиска</string>
+    <string name="taskbar_search">Поиск</string>
+    <string name="tab_tiles">Плитки</string>
+    <string name="tab_all">Все приложения</string>
+    <string name="empty_tiles">Здесь пока пусто.\nОткройте «Все приложения», нажмите и удерживайте приложение и выберите «Закрепить на начальном экране».</string>
+    <string name="start_button">Пуск</string>
+    <string name="settings">Параметры</string>
+    <string name="pin_start">Закрепить на начальном экране</string>
+    <string name="unpin_start">Открепить от начального экрана</string>
+    <string name="pin_taskbar">Закрепить на панели задач</string>
+    <string name="unpin_taskbar">Открепить от панели задач</string>
+    <string name="taskbar_full">На панели задач максимум 3 приложения</string>
+    <string name="app_info">О приложении</string>
+    <string name="uninstall">Удалить</string>
+</resources>
